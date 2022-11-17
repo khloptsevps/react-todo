@@ -1,0 +1,52 @@
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #efeef5;
+  font-weight: 400;
+}
+
+*,
+:after,
+:before {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  list-style: none;
+  outline: none;
+  -webkit-box-sizing: border-box;
+  font-size: 18px;
+}
+
+.wrapper {
+  border-radius: 10px;
+  background-color: #fff;
+  width: calc(100vw - 5rem);
+  max-width: 1440px;
+  margin: 20px auto;
+  @media screen and (max-width: 720px) {
+    margin: 20px auto;
+  }
+}
+
+.container {
+  padding: 20px 40px;
+}
+
+.button {
+  width: 100px;
+  height: 35px;
+  &:hover {
+    background-color: blue;
+  }
+}
+
+.todos {
+  max-width: 70%;
+  margin: 0 auto;
+}
+
+.add {
+  display: flex;
+  justify-content: center;
+  padding: 15px 0;
+  margin-bottom: 20px;
+}
