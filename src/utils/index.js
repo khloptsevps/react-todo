@@ -1,5 +1,3 @@
-/* eslint-disable array-callback-return */
-/* eslint-disable no-unused-vars */
 import dayjs from 'dayjs';
 
 export default (snapshot) => {

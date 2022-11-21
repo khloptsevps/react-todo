@@ -1,14 +1,13 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import styles from './Checkbox.module.less';
 
 import { setComplete } from '../../redux/slices/todoSlice.js';
 
 const Checkbox = ({ complete, id }) => {
   const dispatch = useDispatch();
-  const todos = useSelector((state) => state.todosState.todos);
-  const currentTodo = todos.find((todo) => todo.id === id);
+
   const handleCheckbox = () => {
     dispatch(setComplete({ id, complete: !complete }));
   };
