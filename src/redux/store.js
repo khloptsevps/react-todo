@@ -4,8 +4,8 @@ import modalReducer from './slices/modalSlice';
 
 const store = configureStore({
   reducer: {
-    todoReducer,
-    modalReducer,
+    todosState: todoReducer,
+    modalState: modalReducer,
   },
 });
 
