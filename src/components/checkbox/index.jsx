@@ -1,11 +1,16 @@
+/* eslint-disable no-unused-vars */
 import React from 'react';
-
+import { useDispatch, useSelector } from 'react-redux';
 import styles from './Checkbox.module.less';
 
+import { setComplete } from '../../redux/slices/todoSlice.js';
+
 const Checkbox = ({ complete, id }) => {
-  const [isComplete, setIsComplete] = React.useState(complete);
+  const dispatch = useDispatch();
+  const todos = useSelector((state) => state.todosState.todos);
+  const currentTodo = todos.find((todo) => todo.id === id);
   const handleCheckbox = () => {
-    setIsComplete(!isComplete);
+    dispatch(setComplete({ id, complete: !complete }));
   };
   return (
     <div>
@@ -15,7 +20,7 @@ const Checkbox = ({ complete, id }) => {
         type="checkbox"
         name="checkbox"
         id={id}
-        checked={isComplete}
+        checked={complete}
       />
       <label htmlFor={id}> </label>
     </div>
