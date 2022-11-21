@@ -1,9 +1,15 @@
 import React from 'react';
 import dayjs from 'dayjs';
+
+import { useDispatch } from 'react-redux';
+
+import { openModal } from '../../redux/slices/modalSlice';
+
 import styles from './TodoItem.module.less';
 import Checkbox from '../checkbox';
 
 const TodoItem = ({ item }) => {
+  const dispatch = useDispatch();
   const dueDate = dayjs(item.dueDate);
 
   const formattedDueDate = new Date(dueDate.format('YYYY-MM-DD'));
@@ -11,9 +17,30 @@ const TodoItem = ({ item }) => {
 
   const isExpired = currentDate > formattedDueDate ? styles.expired : null;
 
+  const liClasses = item.complete
+    ? `${styles.root} ${styles.complete}`
+    : `${styles.root}`;
+
+  const handleRemoveButton = () => {
+    dispatch(
+      openModal({ type: 'removeTodo', isOpened: true, extra: { id: item.id } }),
+    );
+  };
+
+  const handleViewButton = () => {
+    dispatch(
+      openModal({ type: 'viewTodo', isOpened: true, extra: { id: item.id } }),
+    );
+  };
+  const handleEditButton = () => {
+    dispatch(
+      openModal({ type: 'editTodo', isOpened: true, extra: { id: item.id } }),
+    );
+  };
+
   return (
-    <li key={item.id} className={styles.root}>
-      <div className={styles.complete}>
+    <li key={item.id} className={liClasses}>
+      <div className={styles.checkbox}>
         <Checkbox complete={item.complete} id={item.id} />
       </div>
       <div className={styles.content}>
@@ -23,11 +50,27 @@ const TodoItem = ({ item }) => {
           {dueDate.format('DD.MM.YYYY')}
         </div>
       </div>
-      <div className="buttons">
-        <button type="button" className="btn btn-outline-primary me-2">
+      <div className={styles.buttons}>
+        <button
+          onClick={handleViewButton}
+          type="button"
+          className="btn btn-outline-primary me-2"
+        >
+          Просмотр
+        </button>
+        <button
+          disabled={item.complete}
+          type="button"
+          className="btn btn-outline-primary me-2"
+          onClick={handleEditButton}
+        >
           Редактировать
         </button>
-        <button type="button" className="btn btn-danger">
+        <button
+          onClick={handleRemoveButton}
+          type="button"
+          className="btn btn-danger"
+        >
           Удалить
         </button>
       </div>
