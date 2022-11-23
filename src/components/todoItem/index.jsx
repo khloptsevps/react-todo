@@ -7,6 +7,7 @@ import { openModal } from '../../redux/slices/modalSlice';
 
 import styles from './TodoItem.module.less';
 import Checkbox from '../checkbox';
+import FilesList from '../filesList/FilesList';
 
 const TodoItem = ({ item }) => {
   const dispatch = useDispatch();
@@ -15,15 +16,17 @@ const TodoItem = ({ item }) => {
   const formattedDueDate = new Date(dueDate.format('YYYY-MM-DD'));
   const currentDate = new Date(dayjs(Date.now()).format('YYYY-MM-DD'));
 
-  const isExpired = currentDate > formattedDueDate ? styles.expired : null;
-
-  const liClasses = item.complete
-    ? `${styles.root} ${styles.complete}`
-    : `${styles.root}`;
+  const isCompleted = item.complete ? `${styles.complete}` : '';
+  const isExpired =
+    currentDate > formattedDueDate && !item.complete ? `${styles.expired}` : '';
 
   const handleRemoveButton = () => {
     dispatch(
-      openModal({ type: 'removeTodo', isOpened: true, extra: { id: item.id } }),
+      openModal({
+        type: 'removeTodo',
+        isOpened: true,
+        extra: { id: item.id, files: item.files },
+      }),
     );
   };
 
@@ -39,16 +42,15 @@ const TodoItem = ({ item }) => {
   };
 
   return (
-    <li key={item.id} className={liClasses}>
+    <li key={item.id} className={`${styles.root} ${isCompleted}`}>
       <div className={styles.checkbox}>
         <Checkbox complete={item.complete} id={item.id} />
       </div>
       <div className={styles.content}>
         <h2 className={styles.title}>{item.title}</h2>
         <p className={styles.description}>{item.description}</p>
-        <div className={`${styles.duedate} ${isExpired} mb-4`}>
-          {dueDate.format('DD.MM.YYYY')}
-        </div>
+        <p className={`${isExpired}`}>{dueDate.format('DD.MM.YYYY')}</p>
+        {isExpired && <p>Задача не выполнена в срок!</p>}
       </div>
       <div className={styles.buttons}>
         <button
@@ -74,6 +76,11 @@ const TodoItem = ({ item }) => {
           Удалить
         </button>
       </div>
+      {item.files.length > 0 && (
+        <div className={styles.files}>
+          <FilesList item={item} />
+        </div>
+      )}
     </li>
   );
 };
