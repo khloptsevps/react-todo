@@ -11,11 +11,11 @@ const RemoveTodoModal = () => {
   const dispatch = useDispatch();
   const selector = useSelector((state) => state.modalState);
 
-  const { id } = selector.extra;
+  const { id, files } = selector.extra;
 
   const [isDisabled, setIsDisabled] = useState(false);
   const handleRemoveButton = () => {
-    dispatch(removeTodo(id));
+    dispatch(removeTodo({ id, files }));
     setIsDisabled(!isDisabled);
   };
   const handleChancelButton = () => dispatch(closeModal());
