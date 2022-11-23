@@ -1,8 +1,6 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useRef, useEffect } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
-
 import dayjs from 'dayjs';
 
 import { addTodo } from '../../redux/slices/todoSlice';
@@ -16,12 +14,13 @@ const AddTodoForm = () => {
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(dateNow);
   const [isDisabled, setIsDisabled] = useState(false);
+  const [files, setFiles] = useState([]);
 
-  const ref = useRef(null);
+  const input = useRef(null);
 
   useEffect(() => {
     if (!touched) {
-      ref.current?.focus();
+      input.current?.focus();
       setIsTouched(true);
     }
   }, [touched]);
@@ -36,6 +35,7 @@ const AddTodoForm = () => {
       dueDate,
       complete: false,
       createdAt,
+      files,
     };
     setIsDisabled(true);
     dispatch(addTodo(formData));
@@ -46,7 +46,10 @@ const AddTodoForm = () => {
   const handleDateInput = (e) => setDate(e.target.value);
 
   const handleFilesInput = (e) => {
-    console.log(e.target.files);
+    for (let i = 0; i < e.target.files.length; i += 1) {
+      const { name } = e.target.files[i];
+      setFiles((prev) => [...prev, { name, file: e.target.files[i] }]);
+    }
   };
 
   return (
@@ -54,7 +57,7 @@ const AddTodoForm = () => {
       <Form.Group className="mb-3" controlId="form-title">
         <Form.Label>Название</Form.Label>
         <Form.Control
-          ref={ref}
+          ref={input}
           onChange={handleTitleInput}
           value={title}
           type="text"
@@ -79,6 +82,7 @@ const AddTodoForm = () => {
         <Form.Control
           type="date"
           value={date}
+          min={dateNow}
           onChange={handleDateInput}
           placeholder="Дата выполнения"
           disabled={isDisabled}
@@ -88,6 +92,7 @@ const AddTodoForm = () => {
       <Form.Group className="mb-3" controlId="form-date">
         <Form.Label>Загрузить файлы</Form.Label>
         <Form.Control
+          multiple
           onChange={handleFilesInput}
           type="file"
           disabled={isDisabled}
