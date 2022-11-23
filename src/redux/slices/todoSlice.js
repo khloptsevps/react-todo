@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
   collection,
@@ -8,9 +7,15 @@ import {
   addDoc,
   deleteDoc,
 } from 'firebase/firestore';
-import dayjs from 'dayjs';
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  listAll,
+  deleteObject,
+} from 'firebase/storage';
 
-import db from '../../firebaseConfig.js';
+import db, { storage } from '../../firebaseConfig.js';
 
 import normalize from '../../utils/index.js';
 
@@ -19,8 +24,17 @@ const todosCollection = collection(db, 'todos');
 export const fetchAllTodos = createAsyncThunk(
   'todoSlice/fetchAllTodos',
   async () => {
+    const listRef = ref(storage, 'files');
+    const list = await listAll(listRef);
+    const listData = list.items.map(async (reference) => {
+      const link = await getDownloadURL(reference);
+      const { name } = reference;
+      return { name, link };
+    });
+    const filesData = await Promise.all(listData);
+
     const todosSnapshot = await getDocs(todosCollection);
-    const todos = normalize(todosSnapshot);
+    const todos = normalize(todosSnapshot, filesData);
     return todos;
   },
 );
@@ -28,13 +42,24 @@ export const fetchAllTodos = createAsyncThunk(
 // Add todo function
 export const addTodo = createAsyncThunk(
   'todoSlice/addTodo',
-  // eslint-disable-next-line consistent-return
-  async (formData) => {
+  async ({ files, ...formData }) => {
     try {
-      const docRef = await addDoc(todosCollection, formData);
-      return { id: docRef.id, ...formData };
+      const promiseLinks = files.map(async ({ name, file }) => {
+        const fileRef = ref(storage, `files/${name}`);
+        await uploadBytes(fileRef, file);
+        const link = await getDownloadURL(fileRef);
+        return { name, link };
+      });
+      const data = await Promise.all(promiseLinks);
+      const links = data.map(({ link }) => link);
+      const docRef = await addDoc(todosCollection, {
+        ...formData,
+        files: links,
+      });
+      return { id: docRef.id, ...formData, files: data };
     } catch (error) {
       console.log(error);
+      return error;
     }
   },
 );
@@ -50,9 +75,16 @@ export const editTodo = createAsyncThunk(
 
 export const removeTodo = createAsyncThunk(
   'todoSlice/removeTodo',
-  async (id) => {
+  async ({ id, files }) => {
     const todoRef = doc(db, 'todos', id);
     await deleteDoc(todoRef);
+    if (!files.length) {
+      return { id };
+    }
+    files.forEach(({ name }) => {
+      const fileRef = ref(storage, `files/${name}`);
+      deleteObject(fileRef);
+    });
     return { id };
   },
 );
