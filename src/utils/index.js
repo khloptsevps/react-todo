@@ -1,9 +1,16 @@
 import dayjs from 'dayjs';
 
-export default (snapshot) => {
+export default (snapshot, filesData) => {
   const todoList = snapshot.docs.map((doc) => {
-    const newDueDate = dayjs(doc.data().dueDate).format('YYYY-MM-DD');
-    const todo = { id: doc.id, ...doc.data(), dueDate: newDueDate };
+    const { files, dueDate } = doc.data();
+    const docFiles = filesData.filter(({ link }) => files.includes(link));
+    const newDueDate = dayjs(dueDate).format('YYYY-MM-DD');
+    const todo = {
+      id: doc.id,
+      ...doc.data(),
+      dueDate: newDueDate,
+      files: docFiles,
+    };
     return todo;
   });
   return todoList.sort((a, b) => {
