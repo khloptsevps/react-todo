@@ -33,20 +33,20 @@ const ViewTodoModal = () => {
       <Modal.Body className={styles.body}>
         <div className={styles.wrapper}>
           <p>{currentTodo.description}</p>
-          {isExpired ? (
+          {isExpired && !currentTodo.complete && (
             <p className={`${styles.text} text-danger`}>
               <span>Задача не выполнена в срок!</span>
               <br />
               <span>Срок исполнения: {formattedDueDate}</span>
             </p>
-          ) : (
-            <p className={styles.text}>
-              <span>Завершить до: </span>
-              {formattedDueDate}
-            </p>
           )}
           {currentTodo.complete && (
             <p className={`${styles.text} text-success`}>Задача завершена!</p>
+          )}
+          {!isExpired && !currentTodo.complete && (
+            <p className={`${styles.text} text-success`}>
+              <span>Завершить до: {formattedDueDate}</span>
+            </p>
           )}
         </div>
       </Modal.Body>
