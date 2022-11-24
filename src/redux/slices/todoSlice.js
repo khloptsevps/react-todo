@@ -24,46 +24,58 @@ const todosCollection = collection(db, 'todos');
 export const fetchAllTodos = createAsyncThunk(
   'todoSlice/fetchAllTodos',
   async () => {
-    const listRef = ref(storage, 'files');
-    const list = await listAll(listRef);
-    const listData = list.items.map(async (reference) => {
+    const listFilesRef = ref(storage, 'files');
+    const listFiles = await listAll(listFilesRef);
+    const normalizeList = listFiles.items.map(async (reference) => {
       const link = await getDownloadURL(reference);
       const { name } = reference;
       return { name, link };
     });
-    const filesData = await Promise.all(listData);
-
+    const filesData = await Promise.all(normalizeList);
     const todosSnapshot = await getDocs(todosCollection);
     const todos = normalize(todosSnapshot, filesData);
     return todos;
   },
 );
 
-// Add todo function
+/**
+ * Выполняет запрос к Firebase на добавление Todo
+ * @middleware
+ *
+ * @return {Object} передает Todo в Action.
+ */
 export const addTodo = createAsyncThunk(
   'todoSlice/addTodo',
   async ({ files, ...formData }) => {
-    try {
-      const promiseLinks = files.map(async ({ name, file }) => {
-        const fileRef = ref(storage, `files/${name}`);
-        await uploadBytes(fileRef, file);
-        const link = await getDownloadURL(fileRef);
-        return { name, link };
-      });
-      const data = await Promise.all(promiseLinks);
-      const links = data.map(({ link }) => link);
-      const docRef = await addDoc(todosCollection, {
-        ...formData,
-        files: links,
-      });
-      return { id: docRef.id, ...formData, files: data };
-    } catch (error) {
-      console.log(error);
-      return error;
-    }
+    const promiseLinks = files.map(async ({ name, file }) => {
+      const fileRef = ref(storage, `files/${name}`);
+      await uploadBytes(fileRef, file);
+      const link = await getDownloadURL(fileRef);
+      return { name, link };
+    });
+
+    /** массив данных для action
+     * @example
+     * const data = [{ name: 'example.md', link: 'http://example....}]
+     */
+    const data = await Promise.all(promiseLinks);
+
+    /** массив ссылок для добавления в документ */
+    const links = data.map(({ link }) => link);
+    const docRef = await addDoc(todosCollection, {
+      ...formData,
+      files: links,
+    });
+    return { id: docRef.id, ...formData, files: data };
   },
 );
 
+/**
+ * Выполняет запрос к Firebase на изменение Todo
+ * @middleware
+ *
+ * @return {Object} передает измененный Todo в Action.
+ */
 export const editTodo = createAsyncThunk(
   'todoSlice/editTodo',
   async (formData) => {
@@ -73,6 +85,12 @@ export const editTodo = createAsyncThunk(
   },
 );
 
+/**
+ * Выполняет запрос к Firebase на удаление Todo и файлов
+ * @middleware
+ *
+ * @return {Object} передает Id в Action.
+ */
 export const removeTodo = createAsyncThunk(
   'todoSlice/removeTodo',
   async ({ id, files }) => {
@@ -103,7 +121,6 @@ export const setComplete = createAsyncThunk(
 const initialState = {
   todos: [],
   loadingStatus: 'idle',
-  error: null,
 };
 
 export const counterSlice = createSlice({
@@ -114,19 +131,11 @@ export const counterSlice = createSlice({
     builder
       .addCase(fetchAllTodos.pending, (state) => {
         const loadingStatus = 'loading';
-        const error = null;
-        return { ...state, loadingStatus, error };
+        return { ...state, loadingStatus };
       })
       .addCase(fetchAllTodos.fulfilled, (state, { payload }) => {
         const loadingStatus = 'loaded';
-        const error = null;
-        return { ...state, todos: payload, loadingStatus, error };
-      })
-      .addCase(fetchAllTodos.rejected, (_state, action) => {
-        const todos = [];
-        const loadingStatus = 'failed';
-        const { error } = action;
-        return { todos, loadingStatus, error };
+        return { ...state, todos: payload, loadingStatus };
       })
       .addCase(addTodo.fulfilled, (state, { payload }) => {
         const { todos } = state;
