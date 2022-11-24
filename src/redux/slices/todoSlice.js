@@ -38,12 +38,6 @@ export const fetchAllTodos = createAsyncThunk(
   },
 );
 
-/**
- * Выполняет запрос к Firebase на добавление Todo
- * @middleware
- *
- * @return {Object} передает Todo в Action.
- */
 export const addTodo = createAsyncThunk(
   'todoSlice/addTodo',
   async ({ files, ...formData }) => {
@@ -54,13 +48,8 @@ export const addTodo = createAsyncThunk(
       return { name, link };
     });
 
-    /** массив данных для action
-     * @example
-     * const data = [{ name: 'example.md', link: 'http://example....}]
-     */
     const data = await Promise.all(promiseLinks);
 
-    /** массив ссылок для добавления в документ */
     const links = data.map(({ link }) => link);
     const docRef = await addDoc(todosCollection, {
       ...formData,
@@ -70,12 +59,6 @@ export const addTodo = createAsyncThunk(
   },
 );
 
-/**
- * Выполняет запрос к Firebase на изменение Todo
- * @middleware
- *
- * @return {Object} передает измененный Todo в Action.
- */
 export const editTodo = createAsyncThunk(
   'todoSlice/editTodo',
   async (formData) => {
@@ -85,12 +68,6 @@ export const editTodo = createAsyncThunk(
   },
 );
 
-/**
- * Выполняет запрос к Firebase на удаление Todo и файлов
- * @middleware
- *
- * @return {Object} передает Id в Action.
- */
 export const removeTodo = createAsyncThunk(
   'todoSlice/removeTodo',
   async ({ id, files }) => {
