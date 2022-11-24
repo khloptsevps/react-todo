@@ -37,10 +37,8 @@ export default (snapshot, filesData) => {
     return todo;
   });
   return todoList.sort((a, b) => {
-    const aCreated = dayjs(a.createdAt).format('YYYY-MM-DD HH:mm:ss');
-    const bCreated = dayjs(b.createdAt).format('YYYY-MM-DD HH:mm:ss');
-    const aDate = new Date(aCreated);
-    const bDate = new Date(bCreated);
-    return bDate - aDate;
+    const aCreated = dayjs(a.createdAt).toDate();
+    const bCreated = dayjs(b.createdAt).toDate();
+    return bCreated - aCreated;
   });
 };
