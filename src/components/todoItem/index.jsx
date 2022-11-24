@@ -50,7 +50,9 @@ const TodoItem = ({ item }) => {
         <h2 className={styles.title}>{item.title}</h2>
         <p className={styles.description}>{item.description}</p>
         <p className={`${isExpired}`}>{dueDate.format('DD.MM.YYYY')}</p>
-        {isExpired && <p>Задача не выполнена в срок!</p>}
+        {isExpired && (
+          <p className={`${isExpired} mb-2`}>Задача не выполнена в срок!</p>
+        )}
       </div>
       <div className={styles.buttons}>
         <button
